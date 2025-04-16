@@ -8,7 +8,7 @@ const {CustomMerger}  = require('./custom')
 const session = require('express-session');
 const upload = multer({ dest: 'uploads/' })
 app.use('/static', express.static('public'))
-const port = 3000
+const port = process.env.PORT || 3000;
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -99,6 +99,6 @@ app.get('/home', (req, res) => {
   
   
 })
-app.listen(port, () => {
-  console.log(`Example app listening on port http://localhost:${port}`)
-})
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${port}`);
+});
