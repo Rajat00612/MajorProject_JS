@@ -57,20 +57,21 @@ app.get('/home', (req, res) => {
 });
 
 // ✅ Simple merge endpoint
+// ✅ Route for simple full merge
 app.post('/merge', upload.array('pdfs', 2), async (req, res) => {
   try {
-    const file1Path = path.join(__dirname, req.files[0].path);
-    const file2Path = path.join(__dirname, req.files[1].path);
-
-    const mergedFilename = await mergePdfs(file1Path, file2Path);
-    res.redirect(`/static/${mergedFilename}`);
+    const d = await mergePdfs(
+      req.files[0].path, // no __dirname needed
+      req.files[1].path
+    );
+    res.redirect(`/static/${d}`);
   } catch (error) {
     console.error('Error merging PDFs:', error);
     res.status(500).send('Failed to merge PDFs.');
   }
 });
 
-// ✅ Custom page merge endpoint
+// ✅ Route for custom page merge
 app.post('/CustomMerge', upload.array('pdfs', 2), async (req, res) => {
   const { Pdf1Start, Pdf1End, Pdf2Start, Pdf2End } = req.body;
 
@@ -79,24 +80,19 @@ app.post('/CustomMerge', upload.array('pdfs', 2), async (req, res) => {
   }
 
   try {
-    const file1Path = path.join(__dirname, req.files[0].path);
-    const file2Path = path.join(__dirname, req.files[1].path);
-
-    const customMergedFilename = await CustomMerger(
-      file1Path,
-      file2Path,
-      parseInt(Pdf1Start),
-      parseInt(Pdf1End),
-      parseInt(Pdf2Start),
-      parseInt(Pdf2End)
+    const mergedPdf = await CustomMerger(
+      req.files[0].path,
+      req.files[1].path,
+      parseInt(Pdf1Start), parseInt(Pdf1End),
+      parseInt(Pdf2Start), parseInt(Pdf2End)
     );
-
-    res.redirect(`/static/${customMergedFilename}`);
+    res.redirect(`/static/${mergedPdf}`);
   } catch (error) {
     console.error('Error during custom PDF merge:', error);
-    res.status(500).send('Error during custom PDF merge.');
+    res.status(500).send('Error during PDF merging.');
   }
 });
+
 
 // ✅ Contact form
 app.post('/submit', (req, res) => {
