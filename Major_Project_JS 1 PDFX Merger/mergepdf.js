@@ -2,30 +2,19 @@ const PDFMerger = require('pdf-merger-js');
 const fs = require('fs');
 const path = require('path');
 
-const merger = new PDFMerger();
-
 const mergePdfs = async (p1, p2) => {
-  try {
-    await merger.add(p1);  // Merge the first PDF
-    await merger.add(p2);  // Merge the second PDF
+  const merger = new PDFMerger();
 
-    // Ensure 'public' directory exists
-    const publicDir = path.join(__dirname, 'public');
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir);
-    }
+  await merger.add(p1);
+  await merger.add(p2);
 
-    let filename = `merged-${Date.now()}.pdf`;  // Generate unique filename
-    const outputPath = path.join(publicDir, filename);  // Output path
+  let filename = `merged-${Date.now()}.pdf`;
+  const outputPath = path.join(__dirname, 'public', filename);
 
-    console.log('Saving merged PDF to:', outputPath);  // Log for debugging
-    await merger.save(outputPath);  // Save the merged file
+  await merger.save(outputPath);
 
-    return filename;  // Return file name for frontend
-  } catch (err) {
-    console.error('Merge Error:', err);
-    throw err;
-  }
+  return filename;
 };
 
 module.exports = { mergePdfs };
+
