@@ -23,19 +23,19 @@ app.use(session({
 
 // ✅ Routes for pages
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, "templates/index.html"));
+  res.sendFile(path.join(__dirname, "Templates/index.html"));
 });
 
 app.get('/custom', (req, res) => {
-  res.sendFile(path.join(__dirname, "templates/Custom.html"));
+  res.sendFile(path.join(__dirname, "Templates/Custom.html"));
 });
 
 app.get('/about', (req, res) => {
-  res.sendFile(path.join(__dirname, "templates/about.html"));
+  res.sendFile(path.join(__dirname, "Templates/about.html"));
 });
 
 app.get('/contact', (req, res) => {
-  res.sendFile(path.join(__dirname, "templates/contact.html"));
+  res.sendFile(path.join(__dirname, "Templates/contact.html"));
 });
 
 // ✅ Route for simple full merge
@@ -94,7 +94,7 @@ app.post('/submit', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-  res.sendFile(path.join(__dirname, "templates/index.html"));
+  res.sendFile(path.join(__dirname, "Templates/index.html"));
 });
 
 // ✅ Server listen
