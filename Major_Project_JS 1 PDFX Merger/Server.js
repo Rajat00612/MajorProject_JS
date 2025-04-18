@@ -4,13 +4,17 @@ const multer = require('multer');
 const { mergePdfs } = require('./mergepdf');
 const { CustomMerger } = require('./custom');
 const session = require('express-session');
-
+const fs = require('fs');
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+}
 const app = express();
 const port = process.env.PORT || 3000; // ✅ dynamic port for Render
 
 const upload = multer({ dest: 'uploads/' });
 
 // ✅ Middleware
+app.use('/static', express.static(path.join(__dirname, 'uploads')));
 app.use('/static', express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
