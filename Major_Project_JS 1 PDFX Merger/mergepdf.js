@@ -1,18 +1,19 @@
-
 const PDFMerger = require('pdf-merger-js');
+const fs = require('fs');
+const path = require('path');
 
-var merger = new PDFMerger();
-const outputPath = path.join(__dirname, 'uploads', `${filename}.pdf`);
+const merger = new PDFMerger();
+
 const mergePdfs = async (p1, p2) => {
-  await merger.add(p1);  //merge all pages. parameter is the path to file and filename.
-  await merger.add(p2); // merge only page 2 
-  let d = new Date().getTime()
-  await merger.save(`public/${d}.pdf`); //save under given name and reset the internal document
-  return d
-  // Export the merged PDF as a nodejs Buffer
-  // const mergedPdfBuffer = await merger.saveAsBuffer();
-  // fs.writeSync('merged.pdf', mergedPdfBuffer);
-return `${filename}`;  // Not full path
-} 
+  await merger.add(p1);  // Merge the first PDF
+  await merger.add(p2);  // Merge the second PDF
+  
+  let filename = `merged-${Date.now()}.pdf`;  // Generate a unique filename based on the current timestamp
+  const outputPath = path.join(__dirname, 'public', filename);  // Set the correct output path
+  
+  await merger.save(outputPath);  // Save the merged PDF in the 'public' directory
+  
+  return filename;  // Return the filename
+};
 
-module.exports = {mergePdfs}
+module.exports = { mergePdfs };
