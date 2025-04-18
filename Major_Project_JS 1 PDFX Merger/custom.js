@@ -4,7 +4,7 @@ const path = require('path');
 
 async function CustomMerger(pdf1Path, pdf2Path, Pdf1Start, Pdf1End, Pdf2Start, Pdf2End) {
   const pdfDoc = await PDFDocument.create();
-
+const outputPath = path.join(__dirname, 'uploads', `${filename}.pdf`);
   // Load the first PDF
   const pdf1Bytes = fs.readFileSync(pdf1Path);
   const pdf1 = await PDFDocument.load(pdf1Bytes);
@@ -27,6 +27,7 @@ async function CustomMerger(pdf1Path, pdf2Path, Pdf1Start, Pdf1End, Pdf2Start, P
   fs.writeFileSync(path.join(__dirname, 'public', mergedPdfPath), mergedPdfBytes);
   
   return mergedPdfPath;
+  return `${filename}`;  // Not full path
 }
 
 module.exports = { CustomMerger };
