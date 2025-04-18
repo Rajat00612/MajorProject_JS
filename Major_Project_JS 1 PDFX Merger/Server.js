@@ -5,27 +5,37 @@ const { mergePdfs } = require('./mergepdf');
 const { CustomMerger } = require('./custom');
 const session = require('express-session');
 const fs = require('fs');
-if (!fs.existsSync('./uploads')) {
-  fs.mkdirSync('./uploads');
-}
-const app = express();
-const port = process.env.PORT || 3000; // ✅ dynamic port for Render
 
-const upload = multer({ dest: 'uploads/' });
+const app = express();
+const port = process.env.PORT || 3000;
+
+// ✅ Ensure required folders exist
+const uploadsDir = path.join(__dirname, 'uploads');
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir);
+}
+
+// ✅ Multer setup
+const upload = multer({ dest: uploadsDir });
 
 // ✅ Middleware
-app.use('/static', express.static(path.join(__dirname, 'uploads')));
-app.use('/static', express.static('public'));
+app.use('/static', express.static(publicDir));     // Serve merged PDFs
+app.use('/static', express.static(uploadsDir));    // Serve uploaded files
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// ✅ Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'default_secret', // ✅ secure secret
+  secret: process.env.SESSION_SECRET || 'default_secret',
   resave: false,
   saveUninitialized: true
 }));
 
-// ✅ Routes for pages
+// ✅ HTML routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, "Templates/index.html"));
 });
@@ -42,21 +52,25 @@ app.get('/contact', (req, res) => {
   res.sendFile(path.join(__dirname, "Templates/contact.html"));
 });
 
-// ✅ Route for simple full merge
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, "Templates/index.html"));
+});
+
+// ✅ Simple merge endpoint
 app.post('/merge', upload.array('pdfs', 2), async (req, res) => {
   try {
-    const d = await mergePdfs(
-      path.join(__dirname, req.files[0].path),
-      path.join(__dirname, req.files[1].path)
-    );
-    res.redirect(`/static/${d}.pdf`); // ✅ relative path for Render
+    const file1Path = path.join(__dirname, req.files[0].path);
+    const file2Path = path.join(__dirname, req.files[1].path);
+
+    const mergedFilename = await mergePdfs(file1Path, file2Path);
+    res.redirect(`/static/${mergedFilename}`);
   } catch (error) {
     console.error('Error merging PDFs:', error);
     res.status(500).send('Failed to merge PDFs.');
   }
 });
 
-// ✅ Route for custom page merge
+// ✅ Custom page merge endpoint
 app.post('/CustomMerge', upload.array('pdfs', 2), async (req, res) => {
   const { Pdf1Start, Pdf1End, Pdf2Start, Pdf2End } = req.body;
 
@@ -65,20 +79,26 @@ app.post('/CustomMerge', upload.array('pdfs', 2), async (req, res) => {
   }
 
   try {
-    const mergedPdfPath = await CustomMerger(
-      path.join(__dirname, req.files[0].path),
-      path.join(__dirname, req.files[1].path),
-      parseInt(Pdf1Start), parseInt(Pdf1End),
-      parseInt(Pdf2Start), parseInt(Pdf2End)
+    const file1Path = path.join(__dirname, req.files[0].path);
+    const file2Path = path.join(__dirname, req.files[1].path);
+
+    const customMergedFilename = await CustomMerger(
+      file1Path,
+      file2Path,
+      parseInt(Pdf1Start),
+      parseInt(Pdf1End),
+      parseInt(Pdf2Start),
+      parseInt(Pdf2End)
     );
-    res.redirect(`/static/${mergedPdfPath}`); // ✅ relative path for Render
+
+    res.redirect(`/static/${customMergedFilename}`);
   } catch (error) {
     console.error('Error during custom PDF merge:', error);
-    res.status(500).send('Error during PDF merging.');
+    res.status(500).send('Error during custom PDF merge.');
   }
 });
 
-// ✅ Contact form route
+// ✅ Contact form
 app.post('/submit', (req, res) => {
   const { username, phone, email } = req.body;
 
@@ -97,11 +117,7 @@ app.post('/submit', (req, res) => {
   res.redirect('/home?submitted=true');
 });
 
-app.get('/home', (req, res) => {
-  res.sendFile(path.join(__dirname, "Templates/index.html"));
-});
-
-// ✅ Server listen
+// ✅ Server
 app.listen(port, () => {
-  console.log(`PDFXMerger running at http://localhost:${port}`);
+  console.log(`✅ PDFXMerger running on http://localhost:${port}`);
 });
